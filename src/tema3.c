@@ -57,7 +57,7 @@ void print_topology(int rank, int *parents, int size, int error_type, bool small
 }
 
 int main(int argc, char *argv[]) {
-    int num_tasks, rank, ret;           // Process data
+    int num_tasks, rank;                // Process data
     MPI_Status status;
     int array_size = atoi(argv[1]);     // The size of the array
     int error_type = atoi(argv[2]);
@@ -311,8 +311,9 @@ int main(int argc, char *argv[]) {
 
                 // Receive the complete topology from that coordinator
                 MPI_Recv(parents, num_tasks, MPI_INT, 1, 0, MPI_COMM_WORLD, &status);
-                print_topology(rank, parents, num_tasks, error_type, false);
             }
+
+            print_topology(rank, parents, num_tasks, error_type, false);
 
             // Send the complete topology to the previous coordinator
             MPI_Send(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD);
@@ -532,6 +533,10 @@ int main(int argc, char *argv[]) {
             MPI_Send(&end, 1, MPI_INT, parent, 0, MPI_COMM_WORLD);
             print_message(rank, parent);
     }
+
+    free(parents);
+    free(array);
+    free(results);
 
     MPI_Finalize();
 
