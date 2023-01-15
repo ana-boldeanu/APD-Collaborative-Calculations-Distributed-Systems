@@ -108,17 +108,17 @@ int main(int argc, char *argv[]) {
             fclose(input_file);
 
             // Send the partial topology to the next coordinator
-            ret = MPI_Send(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD);
+            MPI_Send(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD);
             print_message(rank, 3);
 
             // Receive the complete topology from that coordinator
-		    ret = MPI_Recv(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
+		    MPI_Recv(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
             print_topology(rank, parents, num_tasks, error_type, false);
 
             // Send the complete topology to all workers
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
                 }
             }
@@ -146,10 +146,8 @@ int main(int argc, char *argv[]) {
             chunk_size = array_size / available_workers;
 
             // Send the array and chunk_size to the next coordinator
-            ret = MPI_Send(array, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD);
-            print_message(rank, 3);
-
-            ret = MPI_Send(&chunk_size, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
+            MPI_Send(array, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD);
+            MPI_Send(&chunk_size, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
             print_message(rank, 3);
 
             // Send the array, start index and end index to all workers
@@ -159,13 +157,9 @@ int main(int argc, char *argv[]) {
                     start = chunk_id * chunk_size;
                     end = (chunk_id + 1) * chunk_size;
                     
-                    ret = MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
 
                     chunk_id++;
@@ -173,18 +167,18 @@ int main(int argc, char *argv[]) {
             }
             
             // Send the chunk_id to the next coordinator
-            ret = MPI_Send(&chunk_id, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
+            MPI_Send(&chunk_id, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
             print_message(rank, 3);
 
             // Receive the partial results from the previous coordinator
-            ret = MPI_Recv(results, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(results, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
 
             // Receive the partial results from the workers and copy them into the results array
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
 
                     for (int i = start; i < end; i++) {
                         results[i] = array[i];
@@ -207,7 +201,7 @@ int main(int argc, char *argv[]) {
             fscanf(input_file, "%d\n", &num_workers);
 
             // Receive the partial topology from the previous coordinator
-		    ret = MPI_Recv(parents, num_tasks, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+		    MPI_Recv(parents, num_tasks, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
 
             // Identify this coordinator's workers and update the topology
             for (int i = 0; i < num_workers; i++) {
@@ -217,21 +211,21 @@ int main(int argc, char *argv[]) {
             fclose(input_file);
 
             // Send the partial topology to the next coordinator
-            ret = MPI_Send(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD);
+            MPI_Send(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD);
             print_message(rank, 2);
 
             // Receive the complete topology from that coordinator
-		    ret = MPI_Recv(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
+		    MPI_Recv(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
             print_topology(rank, parents, num_tasks, error_type, false);
             
             // Send the complete topology to the previous coordinator
-            ret = MPI_Send(parents, num_tasks, MPI_INT, 0, 0, MPI_COMM_WORLD);
+            MPI_Send(parents, num_tasks, MPI_INT, 0, 0, MPI_COMM_WORLD);
             print_message(rank, 0);
 
             // Send the complete topology to all workers
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
                 }
             }
@@ -241,15 +235,13 @@ int main(int argc, char *argv[]) {
             ===================================================================
             */
             // Receive the array, chunk_size and chunk_id from the previous coordinator
-            ret = MPI_Recv(array, array_size, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&chunk_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&chunk_id, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(array, array_size, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chunk_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chunk_id, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
 
             // Send the array and chunk_size to the next coordinator
-            ret = MPI_Send(array, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD);
-            print_message(rank, 2);
-
-            ret = MPI_Send(&chunk_size, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
+            MPI_Send(array, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD);
+            MPI_Send(&chunk_size, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
             print_message(rank, 2);
 
             // Send the array, start index and end index to all workers
@@ -258,13 +250,9 @@ int main(int argc, char *argv[]) {
                     start = chunk_id * chunk_size;
                     end = (chunk_id + 1) * chunk_size;
                     
-                    ret = MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
 
                     chunk_id++;
@@ -272,18 +260,18 @@ int main(int argc, char *argv[]) {
             }
             
             // Send the chunk_id to the next coordinator
-            ret = MPI_Send(&chunk_id, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
+            MPI_Send(&chunk_id, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
             print_message(rank, 2);
 
             // Receive the partial results from the previous coordinator
-            ret = MPI_Recv(results, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(results, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
 
             // Receive the partial results from the workers and copy them into the results array
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
 
                     for (int i = start; i < end; i++) {
                         results[i] = array[i];
@@ -292,7 +280,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Send the partial results to the next coordinator
-            ret = MPI_Send(results, array_size, MPI_INT, 0, 0, MPI_COMM_WORLD);
+            MPI_Send(results, array_size, MPI_INT, 0, 0, MPI_COMM_WORLD);
             print_message(rank, 0);
             break;
 
@@ -307,7 +295,7 @@ int main(int argc, char *argv[]) {
             fscanf(input_file, "%d\n", &num_workers);
 
             // Receive the partial topology from the previous coordinator
-		    ret = MPI_Recv(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
+		    MPI_Recv(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
 
             // Identify this coordinator's workers and update the topology
             for (int i = 0; i < num_workers; i++) {
@@ -318,22 +306,22 @@ int main(int argc, char *argv[]) {
 
             if (error_type != 2) {
                 // Send the partial topology to the next coordinator
-                ret = MPI_Send(parents, num_tasks, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                MPI_Send(parents, num_tasks, MPI_INT, 1, 0, MPI_COMM_WORLD);
                 print_message(rank, 1);
 
                 // Receive the complete topology from that coordinator
-                ret = MPI_Recv(parents, num_tasks, MPI_INT, 1, 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(parents, num_tasks, MPI_INT, 1, 0, MPI_COMM_WORLD, &status);
                 print_topology(rank, parents, num_tasks, error_type, false);
             }
 
             // Send the complete topology to the previous coordinator
-            ret = MPI_Send(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD);
+            MPI_Send(parents, num_tasks, MPI_INT, 3, 0, MPI_COMM_WORLD);
             print_message(rank, 3);
 
             // Send the complete topology to all workers
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
                 }
             }
@@ -343,16 +331,14 @@ int main(int argc, char *argv[]) {
             ===================================================================
             */
             // Receive the array, chunk_size and chunk_id from the previous coordinator
-            ret = MPI_Recv(array, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&chunk_size, 1, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&chunk_id, 1, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(array, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chunk_size, 1, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chunk_id, 1, MPI_INT, 3, 0, MPI_COMM_WORLD, &status);
 
             // Send the array and chunk_size to the next coordinator
             if (error_type != 2) {
-                ret = MPI_Send(array, array_size, MPI_INT, 1, 0, MPI_COMM_WORLD);
-                print_message(rank, 1);
-
-                ret = MPI_Send(&chunk_size, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                MPI_Send(array, array_size, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                MPI_Send(&chunk_size, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
                 print_message(rank, 1); 
             }
 
@@ -368,13 +354,9 @@ int main(int argc, char *argv[]) {
                         end = array_size;
                     }
 
-                    ret = MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
 
                     chunk_id++;
@@ -383,19 +365,19 @@ int main(int argc, char *argv[]) {
             
             if (error_type != 2) {
                 // Send the chunk_id to the next coordinator
-                ret = MPI_Send(&chunk_id, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                MPI_Send(&chunk_id, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
                 print_message(rank, 1);
 
                 // Receive the partial results from the previous coordinator
-                ret = MPI_Recv(results, array_size, MPI_INT, 1, 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(results, array_size, MPI_INT, 1, 0, MPI_COMM_WORLD, &status);
             }
 
             // Receive the partial results from the workers and copy them into the results array
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
 
                     for (int i = start; i < end; i++) {
                         results[i] = array[i];
@@ -404,7 +386,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Send the partial results to the next coordinator
-            ret = MPI_Send(results, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD);
+            MPI_Send(results, array_size, MPI_INT, 3, 0, MPI_COMM_WORLD);
             print_message(rank, 3);
             break;
 
@@ -420,7 +402,7 @@ int main(int argc, char *argv[]) {
 
             if (error_type != 2) {
                 // Receive the partial topology from the previous coordinator
-                ret = MPI_Recv(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
 
             } else {
                 // If this coordinator isn't connected, initialize its own topology
@@ -441,14 +423,14 @@ int main(int argc, char *argv[]) {
 
             if (error_type != 2) {
                 // Send the complete topology to the previous coordinator
-                ret = MPI_Send(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD);
+                MPI_Send(parents, num_tasks, MPI_INT, 2, 0, MPI_COMM_WORLD);
                 print_message(rank, 2);
             }
 
             // Send the complete topology to all workers
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(parents, num_tasks, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
                 }
             }
@@ -463,9 +445,9 @@ int main(int argc, char *argv[]) {
             }
 
             // Receive the array, chunk_size and chunk_id from the previous coordinator
-            ret = MPI_Recv(array, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&chunk_size, 1, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&chunk_id, 1, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(array, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chunk_size, 1, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chunk_id, 1, MPI_INT, 2, 0, MPI_COMM_WORLD, &status);
 
             // Send the array, start index and end index to all workers
             int worker_id = 0;  // For the last worker, give end of array instead of chunk
@@ -479,13 +461,9 @@ int main(int argc, char *argv[]) {
                         end = array_size;
                     }
 
-                    ret = MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-                    print_message(rank, i);
-
-                    ret = MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                    MPI_Send(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
                     print_message(rank, i);
 
                     chunk_id++;
@@ -495,9 +473,9 @@ int main(int argc, char *argv[]) {
             // Receive the partial results from the workers and copy them into the results array
             for (int i = 0; i < num_tasks; i++) {
                 if (parents[i] == rank) {
-                    ret = MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-                    ret = MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(array, array_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&start, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&end, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
 
                     for (int i = start; i < end; i++) {
                         results[i] = array[i];
@@ -506,7 +484,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Send the partial results to the next coordinator
-            ret = MPI_Send(results, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD);
+            MPI_Send(results, array_size, MPI_INT, 2, 0, MPI_COMM_WORLD);
             print_message(rank, 2);
             break;
         
@@ -518,7 +496,7 @@ int main(int argc, char *argv[]) {
             ===================================================================
             */
             // Receive the complete topology from the parent coordinator
-		    ret = MPI_Recv(parents, num_tasks, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+		    MPI_Recv(parents, num_tasks, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
             // Determine this worker's parent from the topology
             int parent = parents[rank];
@@ -537,10 +515,11 @@ int main(int argc, char *argv[]) {
                 // This worker will not compute any results
                 break;
             }
+
             // Receive the array, start index and end index from the coordinator
-            ret = MPI_Recv(array, array_size, MPI_INT, parent, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&start, 1, MPI_INT, parent, 0, MPI_COMM_WORLD, &status);
-            ret = MPI_Recv(&end, 1, MPI_INT, parent, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(array, array_size, MPI_INT, parent, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&start, 1, MPI_INT, parent, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&end, 1, MPI_INT, parent, 0, MPI_COMM_WORLD, &status);
 
             // Compute the results for given chunk
             for (int i = start; i < end; i++) {
@@ -548,13 +527,9 @@ int main(int argc, char *argv[]) {
             }
 
             // Send the computed array, start and end to the coordinator
-            ret = MPI_Send(array, array_size, MPI_INT, parent, 0, MPI_COMM_WORLD);
-            print_message(rank, parent);
-
-            ret = MPI_Send(&start, 1, MPI_INT, parent, 0, MPI_COMM_WORLD);
-            print_message(rank, parent);
-
-            ret = MPI_Send(&end, 1, MPI_INT, parent, 0, MPI_COMM_WORLD);
+            MPI_Send(array, array_size, MPI_INT, parent, 0, MPI_COMM_WORLD);
+            MPI_Send(&start, 1, MPI_INT, parent, 0, MPI_COMM_WORLD);
+            MPI_Send(&end, 1, MPI_INT, parent, 0, MPI_COMM_WORLD);
             print_message(rank, parent);
     }
 
